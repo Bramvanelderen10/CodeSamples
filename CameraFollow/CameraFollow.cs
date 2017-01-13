@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+/*
+This script will position and resize the camera to optimally display all the action happening in an top down game
+This is used in Tribot Smash!
+https://www.youtube.com/watch?v=DBWMmZ5GOdQ
+*/
 public class CameraFollow : MonoBehaviour
 {
     public float MoveSpeed = 4f;
     public float ResizeSpeed = 4f;
     public float Treshold = 0.1f;
     public float MinSize = 5f;
-    public float ScaleOffset = 1f;
+    public float ScaleOffset = 1f; //Scaleoffset is applied after the camera is scaled to fit all targets. The screensize will be expanded by this value
 
     public List<string> FollowTags = new List<string>
     {
@@ -30,7 +35,7 @@ public class CameraFollow : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-	    CleanUpObjects();
+	    CleanUpObjects(); //Remove all empty objects from the list
         //Add all objects with specified tags to the target list
 	    foreach (var item in FollowTags)
 	    {
