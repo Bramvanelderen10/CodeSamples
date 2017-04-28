@@ -5,9 +5,8 @@ using System.Linq;
 using System;
 
 /*
-This script will position and resize the camera to optimally display all the action happening in an top down game
-This is used in Tribot Smash!
-https://www.youtube.com/watch?v=DBWMmZ5GOdQ
+This script will position and resize the camera to optimally display all the action happening no matter what camera angle! (Excluding third person camera angles and first person camera angles ofcourse!)
+https://www.youtube.com/watch?v=K10brdgt8N0
 */
 public class IsometricCamera : AbstractCamera
 {
@@ -15,11 +14,13 @@ public class IsometricCamera : AbstractCamera
     private List<GameObject> _targetObjects = new List<GameObject>();
     private float _minX = 0f;
     private float _maxX = 0f;
+    private float _minY = 0f;
+    private float _maxY = 0f;
     private float _minZ = 0f;
     private float _maxZ = 0f;
     private Vector3 _localPosition = new Vector3(0, 0, -20);
     private IsometricCameraData _data;
-    private Vector3 _position = new Vector3(0, 0, 0);
+    private Vector3 _posWorldSpace = new Vector3(0, 0, 0);
 
     // Use this for initialization
     void Start()
@@ -31,12 +32,13 @@ public class IsometricCamera : AbstractCamera
     // Update is called once per frame
     void LateUpdate()
     {
-        transform.eulerAngles = new Vector3(_data.xRotation, 0, 0);
+        transform.eulerAngles = _data.Rotation;
         CleanUpObjects();
 
         if (_targetObjects.Count < 1)
             return;
-        var rotation = transform.rotation*Quaternion.Inverse(Quaternion.Euler(0, 90, 0));
+        var rotation = transform.rotation*Quaternion.Inverse(Quaternion.Euler(90, 0, 0));
+        var inverse = Quaternion.Euler(90, 0, 0)*Quaternion.Inverse(transform.rotation);
         for (var i = 0; i < _targetObjects.Count; i++)
         {
             var pos = _targetObjects[i].transform.position;
@@ -46,6 +48,8 @@ public class IsometricCamera : AbstractCamera
             {
                 _minX = pos.x;
                 _maxX = pos.x;
+                _minY = pos.y;
+                _maxY = pos.y;
                 _minZ = pos.z;
                 _maxZ = pos.z;
             }
@@ -53,50 +57,53 @@ public class IsometricCamera : AbstractCamera
             {
                 _maxX = Mathf.Max(_maxX, pos.x);
                 _minX = Mathf.Min(_minX, pos.x);
+                _maxY = Mathf.Max(_maxY, pos.y);
+                _minY = Mathf.Min(_minY, pos.y);
                 _maxZ = Mathf.Max(_maxZ, pos.z);
                 _minZ = Mathf.Min(_minZ, pos.z);
             }
         }
 
         //Calculate the center position between the targets and lerp the camera position towards the center
-        var center = new Vector3((_minX + _maxX) / 2, _position.y, (_minZ + _maxZ) / 2);
-        _position = Vector3.Lerp(_position, center, _data.MoveSpeed * Time.deltaTime);
+        var centerWorldSpace = new Vector3((_minX + _maxX) / 2, (_minY + _maxY) / 2, (_minZ + _maxZ) / 2);
+        _posWorldSpace = Vector3.Lerp(_posWorldSpace, centerWorldSpace, _data.MoveSpeed * Time.deltaTime);
 
         //Calculate optimal camera size based on targets
         //Determine world position of all camera corners on a invisible plane
         var cameraCorners = new Corners();
-        var plane = new Plane(Vector3.up, Vector3.zero);
+        var plane = new Plane(transform.rotation * Vector3.back, _posWorldSpace);
         float distance;
         var ray = _camera.ViewportPointToRay(Vector3.zero);
         if (plane.Raycast(ray, out distance))
         {
-            cameraCorners.DownLeft = ray.GetPoint(distance);
+            cameraCorners.DownLeft = transform.InverseTransformPoint(ray.GetPoint(distance));
         }
 
         ray = _camera.ViewportPointToRay(Vector3.up);
         if (plane.Raycast(ray, out distance))
         {
-            cameraCorners.UpLeft = ray.GetPoint(distance);
+            cameraCorners.UpLeft = transform.InverseTransformPoint(ray.GetPoint(distance));
         }
 
         ray = _camera.ViewportPointToRay(Vector3.right);
         if (plane.Raycast(ray, out distance))
         {
-            cameraCorners.DownRight = ray.GetPoint(distance);
+            cameraCorners.DownRight = transform.InverseTransformPoint(ray.GetPoint(distance));
         }
 
         ray = _camera.ViewportPointToRay(Vector3.one);
         if (plane.Raycast(ray, out distance))
         {
-            cameraCorners.UpRight = ray.GetPoint(distance);
+            cameraCorners.UpRight = transform.InverseTransformPoint(ray.GetPoint(distance));
         }
 
         //Determine with which value the camera size has to be multiplied to fit all targets in the screen
         var scaleValues = new List<float>();
         foreach (var target in _targetObjects)
         {
-            var targetX = target.transform.position.x;
-            var targetZ = target.transform.position.z;
+            var position = transform.InverseTransformPoint(target.transform.position);
+            var targetX = position.x;
+            var targetY = position.y;
 
             //The calculate below can be explained as follows
             //Compare the minimum and maximum values on a certain axis to the value of the target
@@ -108,10 +115,10 @@ public class IsometricCamera : AbstractCamera
             tempScale = (((cameraCorners.LeftHorizontalValue - (targetX - _data.ScaleOffset)) * 2) + cameraCorners.GetWidth()) / cameraCorners.GetWidth();
             scaleValues.Add(tempScale);
 
-            tempScale = (((cameraCorners.BottomVerticalValue - (targetZ - _data.ScaleOffset)) * 2) + cameraCorners.GetHeight()) / cameraCorners.GetHeight();
+            tempScale = (((cameraCorners.BottomVerticalValue - (targetY - _data.ScaleOffset)) * 2) + cameraCorners.GetHeight()) / cameraCorners.GetHeight();
             scaleValues.Add(tempScale);
 
-            tempScale = ((((targetZ + _data.ScaleOffset) - cameraCorners.TopVecticalValue) * 2) + cameraCorners.GetHeight()) / cameraCorners.GetHeight();
+            tempScale = ((((targetY + _data.ScaleOffset) - cameraCorners.TopVecticalValue) * 2) + cameraCorners.GetHeight()) / cameraCorners.GetHeight();
             scaleValues.Add(tempScale);
         }
         //Get the optimal determined value
@@ -132,7 +139,7 @@ public class IsometricCamera : AbstractCamera
             _localPosition.z = -_data.MinSize;
         }
 
-        _camera.transform.position = _position + (transform.rotation*_localPosition);
+        _camera.transform.position = _posWorldSpace + (transform.rotation*_localPosition);
     }
 
     /// <summary>
@@ -186,7 +193,7 @@ public class IsometricCamera : AbstractCamera
         /// </summary>
         public float BottomVerticalValue
         {
-            get { return Mathf.Max(DownLeft.z, DownRight.z); }
+            get { return Mathf.Max(DownLeft.y, DownRight.y); }
         }
 
         /// <summary>
@@ -194,7 +201,7 @@ public class IsometricCamera : AbstractCamera
         /// </summary>
         public float TopVecticalValue
         {
-            get { return Mathf.Min(UpLeft.z, UpRight.z); }
+            get { return Mathf.Min(UpLeft.y, UpRight.y); }
         }
 
         public float GetWidth()
@@ -206,7 +213,7 @@ public class IsometricCamera : AbstractCamera
         public float GetHeight()
         {
 
-            return UpLeft.z - DownLeft.z;
+            return UpLeft.y - DownLeft.y;
         }
 
     }

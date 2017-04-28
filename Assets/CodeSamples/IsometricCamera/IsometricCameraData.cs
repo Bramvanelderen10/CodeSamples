@@ -13,5 +13,5 @@ public class IsometricCameraData : ScriptableObject
     public float Treshold = .1f;
     public float MinSize = 25f;
     public float ScaleOffset = 3.5f;
-    public float xRotation = 80f;
+    public Vector3 Rotation = new Vector3(90, 0, 0);
 }
