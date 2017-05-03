@@ -37,8 +37,6 @@ public class IsometricCamera : AbstractCamera
 
         if (_targetObjects.Count < 1)
             return;
-        var rotation = transform.rotation*Quaternion.Inverse(Quaternion.Euler(90, 0, 0));
-        var inverse = Quaternion.Euler(90, 0, 0)*Quaternion.Inverse(transform.rotation);
         for (var i = 0; i < _targetObjects.Count; i++)
         {
             var pos = _targetObjects[i].transform.position;
