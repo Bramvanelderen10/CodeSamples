@@ -11,7 +11,7 @@ public class Astar : MonoBehaviour
 {
     public delegate void ActionPath(List<ANode> path);
 
-    [SerializeField] private List<string> _hitTags = new List<string>(); //Defines which objects are seen as obstacles
+    [SerializeField] private LayerMask _layer;
     [SerializeField] private Vector3 _nodeHalfExtends; //Defines how big each node is
     [SerializeField] private int _searchDuration = 300;
     private ANode[,] _nodesArray;
@@ -97,22 +97,20 @@ public class Astar : MonoBehaviour
         List<ANode> _openNodes = new List<ANode>();
         List<ANode> _closedNodes = new List<ANode>();
 
+
+        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 10) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
+        int counter = 0;
         //Reset all nodes to default values and set availability and H value
         foreach (var node in _nodesArray)
         {
-            node.Available = false;
-            ///Maybe use layermasks instead to simplify this loop
-            var hits = Physics.OverlapBox(node.Position, _nodeHalfExtends);
-            bool hit = false;
-            for (int i = 0; i < hits.Length; i++)
+            //Split loop over multiple frames
+            counter++;
+            if (counter >= waitFrameInterval)
             {
-                if (_hitTags.Contains(hits[i].tag))
-                {
-                    hit = true;
-                    i = hits.Length;
-                }
+                counter = 0;
+                yield return null;
             }
-            if (hit)
+            if (Physics.CheckBox(node.Position, _nodeHalfExtends, Quaternion.identity, _layer))
                 continue;
 
             //Calculate h value
@@ -124,8 +122,8 @@ public class Astar : MonoBehaviour
         yield return null; //Wait a frame
         _openNodes.Add(start);
         start.Available = false;
-        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
-        int counter = 0;
+        waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
+        counter = 0;
         while (_openNodes.Count != 0)
         {
             //Split loop over multiple frames
