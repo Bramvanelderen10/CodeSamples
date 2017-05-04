@@ -49,7 +49,25 @@ public class Astar : MonoBehaviour
     }
 
     /// <summary>
+    /// Initiates the algorithm
+    /// </summary>
+    /// <param name="startPosition"></param>
+    /// <param name="targetPosition"></param>
+    /// <param name="action"></param>
+    public void GetPath(Vector3 startPosition, Vector3 targetPosition, ActionPath action)
+    {
+        if (_isSearching)
+            return;
+
+        _actionPath = action;
+        StartCoroutine(FindPath(FindNearestNode(startPosition), FindNearestNode(targetPosition)));
+    }
+
+
+
+    /// <summary>
     /// Finds the position of the next node from the nearest node found
+    /// Can be used externally to find where to go based on a path array and current position
     /// </summary>
     /// <param name="path"></param>
     /// <param name="current"></param>
@@ -66,21 +84,6 @@ public class Astar : MonoBehaviour
     }
 
     /// <summary>
-    /// Initiates the algorithm
-    /// </summary>
-    /// <param name="startPosition"></param>
-    /// <param name="targetPosition"></param>
-    /// <param name="action"></param>
-    public void GetPath(Vector3 startPosition, Vector3 targetPosition, ActionPath action)
-    {
-        if (_isSearching)
-            return;
-
-        _actionPath = action;
-        StartCoroutine(FindPath(FindNearestNode(startPosition), FindNearestNode(targetPosition)));
-    }
-
-    /// <summary>
     /// The algorithm itself, in an ienumerator so we can split the logic over multiple frames for performance
     /// </summary>
     /// <param name="maxDuration"></param>
@@ -93,6 +96,7 @@ public class Astar : MonoBehaviour
         List<ANode> _openNodes = new List<ANode>();
         List<ANode> _closedNodes = new List<ANode>();
 
+        //Reset all nodes to default values and set availability and H value
         foreach (var node in _nodesArray)
         {
             node.Available = false;
@@ -110,12 +114,11 @@ public class Astar : MonoBehaviour
             if (hit)
                 continue;
 
-            //Calculate h value CAN BE BACKED IN GENERATEGRID
+            //Calculate h value
             node.H = Mathf.Abs(node.gIndex[1] - target.gIndex[1]) + Mathf.Abs(node.gIndex[0] - target.gIndex[0]);
             node.G = 0;
             node.Parent = null;
             node.Available = true;
-
         }
         yield return null; //Wait a frame
         _openNodes.Add(start);
@@ -173,7 +176,7 @@ public class Astar : MonoBehaviour
             _closedNodes.Add(current);
         }
         _isSearching = false;
-        _actionPath(RetracePath(start, target));
+        _actionPath(RetracePath(start, target)); //Callback
     }
 
     /// <summary>
