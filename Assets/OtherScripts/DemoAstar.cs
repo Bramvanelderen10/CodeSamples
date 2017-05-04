@@ -13,6 +13,10 @@ public class DemoAstar : MonoBehaviour
     private List<GameObject> _visualPath = new List<GameObject>();
 
     [HideInInspector]
+    public int _rows = 10;
+    [HideInInspector]
+    public int _columns = 10;
+    [HideInInspector]
     public bool ContinuesPathDemo = true;
     [HideInInspector]
     public Vector3 StartPosition = Vector3.zero;
@@ -24,13 +28,15 @@ public class DemoAstar : MonoBehaviour
 
     [HideInInspector] public bool TargetBased = false;
 
+    private ObjectPool _pool;
     
 
 	// Use this for initialization
 	void Start ()
 	{
+	    _pool = new ObjectPool(_visualNodePrefab, 500, true);
 	    _astar = GetComponent<Astar>();
-	    GenerateGrid(15, 15);
+	    GenerateGrid();
 	    GeneratePath();
 	}
 	
@@ -39,9 +45,9 @@ public class DemoAstar : MonoBehaviour
 
     }
 
-    public void GenerateGrid(int rows, int columns)
+    public void GenerateGrid()
     {
-        _astar.GenerateGrid(columns, rows);
+        _astar.GenerateGrid(_columns, _rows);
     }
 
     public void GeneratePath()
@@ -64,7 +70,7 @@ public class DemoAstar : MonoBehaviour
             return;
         foreach (var node in _path)
         {
-            var obj = Instantiate(_visualNodePrefab);
+            var obj = _pool.GetObject();
             obj.transform.position = node.Position;
             _visualPath.Add(obj);
         }
@@ -72,7 +78,7 @@ public class DemoAstar : MonoBehaviour
 
     void SavePath(List<ANode> path)
     {
-        print("Path found!");
+        //print("Path found!");
         _path = path;
 
         if (ContinuesPathDemo)
@@ -86,7 +92,7 @@ public class DemoAstar : MonoBehaviour
     {
         foreach (var item in _visualPath)
         {
-            Destroy(item);
+            item.SetActive(false);
         }
     }
 }

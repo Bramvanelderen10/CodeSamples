@@ -6,20 +6,17 @@ using UnityEngine;
 [CustomEditor(typeof(DemoAstar))]
 public class DemoAstarEditor : Editor
 {
-    private int _rows = 10;
-    private int _columns = 10;
-
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
 
         var script = (DemoAstar)target;
-        _rows = EditorGUILayout.IntField("Rows", _rows);
-        _columns = EditorGUILayout.IntField("Columns", _columns);
+        script._rows = EditorGUILayout.IntField("Rows", script._rows);
+        script._columns = EditorGUILayout.IntField("Columns", script._columns);
         if (GUILayout.Button("Update Grid"))
         {
-            script.GenerateGrid(_rows, _columns);
+            script.GenerateGrid();
         }
 
         if (!script.TargetBased)
@@ -28,13 +25,8 @@ public class DemoAstarEditor : Editor
             {
                 script.TargetBased = true;
             }
-            var start = EditorGUILayout.Vector3Field("Start of path", script.StartPosition);
-            var end = EditorGUILayout.Vector3Field("End of path", script.TargetPosition);
-            if (GUILayout.Button("Update start and target positions"))
-            {
-                script.StartPosition = start;
-                script.TargetPosition = end;
-            }
+            script.StartPosition = EditorGUILayout.Vector3Field("Start of path", script.StartPosition);
+            script.TargetPosition = EditorGUILayout.Vector3Field("End of path", script.TargetPosition);
         }
         else
         {

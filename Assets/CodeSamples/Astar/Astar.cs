@@ -13,6 +13,7 @@ public class Astar : MonoBehaviour
 
     [SerializeField] private List<string> _hitTags = new List<string>(); //Defines which objects are seen as obstacles
     [SerializeField] private Vector3 _nodeHalfExtends; //Defines how big each node is
+    [SerializeField] private int _searchDuration = 300;
     private ANode[,] _nodesArray;
     private bool _isSearching = false;
     private int _width; //Width of the grid (Columns)
@@ -39,7 +40,7 @@ public class Astar : MonoBehaviour
             for (int j = 0; j < width; j++)
             {
                 var node = new ANode();
-                node.Position = new Vector3(j + (_nodeHalfExtends.x), transform.position.y, i + (_nodeHalfExtends.z));
+                node.Position = new Vector3((j * (_nodeHalfExtends.x * 2)) + (_nodeHalfExtends.x), transform.position.y, (i * (_nodeHalfExtends.z * 2)) + (_nodeHalfExtends.z));
                 node.gIndex = new int[2];
                 node.gIndex[0] = i;
                 node.gIndex[1] = j;
@@ -123,8 +124,7 @@ public class Astar : MonoBehaviour
         yield return null; //Wait a frame
         _openNodes.Add(start);
         start.Available = false;
-
-        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/8); //Estimated interval value to split the loop over 8 frames
+        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
         int counter = 0;
         while (_openNodes.Count != 0)
         {

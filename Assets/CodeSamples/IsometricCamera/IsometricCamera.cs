@@ -73,30 +73,20 @@ public class IsometricCamera : AbstractCamera
         float distance;
         var ray = _camera.ViewportPointToRay(Vector3.zero);
         if (plane.Raycast(ray, out distance))
-        {
             cameraCorners.DownLeft = transform.InverseTransformPoint(ray.GetPoint(distance));
-        }
-
         ray = _camera.ViewportPointToRay(Vector3.up);
         if (plane.Raycast(ray, out distance))
-        {
             cameraCorners.UpLeft = transform.InverseTransformPoint(ray.GetPoint(distance));
-        }
-
         ray = _camera.ViewportPointToRay(Vector3.right);
         if (plane.Raycast(ray, out distance))
-        {
             cameraCorners.DownRight = transform.InverseTransformPoint(ray.GetPoint(distance));
-        }
-
         ray = _camera.ViewportPointToRay(Vector3.one);
         if (plane.Raycast(ray, out distance))
-        {
             cameraCorners.UpRight = transform.InverseTransformPoint(ray.GetPoint(distance));
-        }
 
         //Determine with which value the camera size has to be multiplied to fit all targets in the screen
         var scaleValues = new List<float>();
+        float max = -99;
         foreach (var target in _targetObjects)
         {
             var position = transform.InverseTransformPoint(target.transform.position);
@@ -108,19 +98,21 @@ public class IsometricCamera : AbstractCamera
             //determine which value the camera size has to be multiplied with to get this point with the min and max axis value of the camera
             //This is done 4 times for the min and max values of the camera for both the axis x and z
             var tempScale = ((((_data.ScaleOffset + targetX) - cameraCorners.RightHorizontalValue) * 2) + cameraCorners.GetWidth()) / cameraCorners.GetWidth();
-            scaleValues.Add(tempScale);
+            if (tempScale > max)
+                max = tempScale;
 
             tempScale = (((cameraCorners.LeftHorizontalValue - (targetX - _data.ScaleOffset)) * 2) + cameraCorners.GetWidth()) / cameraCorners.GetWidth();
-            scaleValues.Add(tempScale);
+            if (tempScale > max)
+                max = tempScale;
 
             tempScale = (((cameraCorners.BottomVerticalValue - (targetY - _data.ScaleOffset)) * 2) + cameraCorners.GetHeight()) / cameraCorners.GetHeight();
-            scaleValues.Add(tempScale);
+            if (tempScale > max)
+                max = tempScale;
 
             tempScale = ((((targetY + _data.ScaleOffset) - cameraCorners.TopVecticalValue) * 2) + cameraCorners.GetHeight()) / cameraCorners.GetHeight();
-            scaleValues.Add(tempScale);
+            if (tempScale > max)
+                max = tempScale;
         }
-        //Get the optimal determined value
-        var max = scaleValues.Max(x => x);
 
         //Lerp camera towards optimal screen size only within the certain threshold
         if (max > 1f || max < (1f - _data.Treshold))
@@ -187,7 +179,7 @@ public class IsometricCamera : AbstractCamera
         }
 
         /// <summary>
-        /// Returns the smallest bottom side Z value
+        /// Returns the smallest bottom side Y value
         /// </summary>
         public float BottomVerticalValue
         {
@@ -195,7 +187,7 @@ public class IsometricCamera : AbstractCamera
         }
 
         /// <summary>
-        /// Returns the biggest top side Z value
+        /// Returns the biggest top side Y value
         /// </summary>
         public float TopVecticalValue
         {
