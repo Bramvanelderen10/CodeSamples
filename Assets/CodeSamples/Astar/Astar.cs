@@ -97,8 +97,7 @@ public class Astar : MonoBehaviour
         List<ANode> _openNodes = new List<ANode>();
         List<ANode> _closedNodes = new List<ANode>();
 
-
-        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 10) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
+        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 10) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to split the following loop over multiple frames
         int counter = 0;
         //Reset all nodes to default values and set availability and H value
         foreach (var node in _nodesArray)

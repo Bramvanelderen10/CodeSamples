@@ -4,20 +4,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Handles what happends when the player collides with another object
+/// Handles what happens when the player collides with another object
 /// We do this because we do not want the default behaviour of unity collisions
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class FlightCollision : MonoBehaviour
 {
     [SerializeField] private List<string> _ignoreTags = new List<string> {"Player"};
-    [SerializeField] private float _velocityBumpLimit;
-    [SerializeField] private float _knockbackVelocity = 20f;
-    [SerializeField] private float _distanceInterval = 3f;
+    [SerializeField] private float _velocityBumpLimit; //Determines from which velocity a bump is actually a bump
+    [SerializeField] private float _knockbackVelocity = 20f; //The velocity that is applied to the target in the opposite direction of the bump direction
+    [SerializeField] private float _distanceInterval = 3f; //The amount of distant the target has to travel until a next bump can happen
     [SerializeField] private float _checkDistanceInterval = .1f;
 
     private Rigidbody _rb;
-    private AudioSource _audio;
     private float _distanceCounter = 0f;
     private Vector3 _lastLocation;
     private Action _bumpListeners;
@@ -64,6 +63,10 @@ public class FlightCollision : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Add a listener to the bump event
+    /// </summary>
+    /// <param name="listener"></param>
     public void AddBumpListener(Action listener)
     {
         if (_bumpListeners == null)
@@ -71,6 +74,10 @@ public class FlightCollision : MonoBehaviour
         _bumpListeners += listener;
     }
 
+    /// <summary>
+    /// Remove a listener from the bump event
+    /// </summary>
+    /// <param name="listener"></param>
     public void RemoveBumpListener(Action listener)
     {
         if (_bumpListeners != null)

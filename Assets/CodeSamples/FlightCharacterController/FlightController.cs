@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// the flight controller is responsible for applying player input to the target
+/// Isometric and third person camera's are supported
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class FlightController : MonoBehaviour
 {
@@ -30,12 +34,18 @@ public class FlightController : MonoBehaviour
     private float _accelModifier = 0f;
     private bool _playerControl = true;
 
+    /// <summary>
+    /// Rotationspeed differs in the different perspective modes
+    /// </summary>
     private float RotationSpeed
     {
         get { return _mode == FlightMode.Isometric ? _rotationSpeed*2 : _rotationSpeed; }
     }
 
-    // Use this for initialization
+
+    /// <summary>
+    /// On start add itself to the camera target and listen to bumps
+    /// </summary>
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
@@ -50,6 +60,9 @@ public class FlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Save input and apply rotation to player
+    /// </summary>
     void Update()
     {
         //Save input each frame no matter what
@@ -72,7 +85,9 @@ public class FlightController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Apply input to velocity
+    /// </summary>
     void FixedUpdate()
     {
         //If there is input accelerate else deaccellerate
