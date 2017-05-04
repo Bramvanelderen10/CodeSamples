@@ -12,18 +12,31 @@ public class DemoAstar : MonoBehaviour
 
     private List<GameObject> _visualPath = new List<GameObject>();
 
+    [HideInInspector]
+    public bool ContinuesPathDemo = true;
+    [HideInInspector]
+    public Vector3 StartPosition = Vector3.zero;
+    [HideInInspector]
+    public Vector3 TargetPosition  = Vector3.one * 10;
+
+    [HideInInspector] public GameObject StartObj;
+    [HideInInspector] public GameObject EndObj;
+
+    [HideInInspector] public bool TargetBased = false;
+
+    
+
 	// Use this for initialization
 	void Start ()
 	{
 	    _astar = GetComponent<Astar>();
 	    GenerateGrid(15, 15);
-	    GeneratePath(new Vector3(0, 0, 0), new Vector3(12, 0, 12));
-	    DisplayPath();
+	    GeneratePath();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        DisplayPath();
+
     }
 
     public void GenerateGrid(int rows, int columns)
@@ -31,8 +44,16 @@ public class DemoAstar : MonoBehaviour
         _astar.GenerateGrid(columns, rows);
     }
 
-    public void GeneratePath(Vector3 start, Vector3 end)
+    public void GeneratePath()
     {
+        var start = StartPosition;
+        var end = TargetPosition;
+        if (TargetBased)
+        {
+            start = StartObj.transform.position;
+            end = EndObj.transform.position;
+        }
+
         _astar.GetPath(start, end, SavePath);
     }
 
@@ -51,10 +72,17 @@ public class DemoAstar : MonoBehaviour
 
     void SavePath(List<ANode> path)
     {
+        print("Path found!");
         _path = path;
+
+        if (ContinuesPathDemo)
+        {
+            DisplayPath();
+            GeneratePath();
+        }
     }
 
-    void CleanUp()
+    public void CleanUp()
     {
         foreach (var item in _visualPath)
         {

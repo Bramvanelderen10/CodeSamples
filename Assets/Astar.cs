@@ -35,6 +35,9 @@ public class Astar : MonoBehaviour
 
     public void GenerateGrid(int width, int length)
     {
+        if (_isSearching)
+            return;
+
         _width = width;
         _length = length;
         _nodesArray = new ANode[length, width];
@@ -72,7 +75,7 @@ public class Astar : MonoBehaviour
             return;
 
         _actionPath = action;
-        StartCoroutine(FindPath(1f, FindNearestNode(startPosition), FindNearestNode(targetPosition)));
+        StartCoroutine(FindPath(.2f, FindNearestNode(startPosition), FindNearestNode(targetPosition)));
     }
 
     IEnumerator FindPath(float maxDuration, ANode start, ANode target)
@@ -164,10 +167,10 @@ public class Astar : MonoBehaviour
             current.InClosed = true;
             _closedNodes.Add(current);
 
-            yield return new WaitForSeconds(waitTime);
+            yield return null;
         }
-        _actionPath(RetracePath(start, target));
         _isSearching = false;
+        _actionPath(RetracePath(start, target));
     }
 
     List<ANode> RetracePath(ANode start, ANode end)
