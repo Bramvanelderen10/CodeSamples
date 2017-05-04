@@ -13,8 +13,6 @@ public class Astar : MonoBehaviour
 
     [SerializeField] private List<string> _hitTags = new List<string>(); //Defines which objects are seen as obstacles
     [SerializeField] private Vector3 _nodeHalfExtends; //Defines how big each node is
-
-    private List<ANode> _nodes;
     private ANode[,] _nodesArray;
     private bool _isSearching = false;
     private int _width; //Width of the grid (Columns)
