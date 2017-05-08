@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 /// <summary>
 /// Grid based astar algorithm
@@ -94,10 +95,11 @@ public class Astar : MonoBehaviour
     IEnumerator FindPath(ANode start, ANode target)
     {
         _isSearching = true;
-        List<ANode> _openNodes = new List<ANode>();
-        List<ANode> _closedNodes = new List<ANode>();
+        List<ANode> openNodes = new List<ANode>();
+        var openTree = new BTree<ANode>();
+        List<ANode> closedNodes = new List<ANode>();
 
-        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 10) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to split the following loop over multiple frames
+        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 5) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to split the following loop over multiple frames
         int counter = 0;
         //Reset all nodes to default values and set availability and H value
         foreach (var node in _nodesArray)
@@ -119,11 +121,14 @@ public class Astar : MonoBehaviour
             node.Available = true;
         }
         yield return null; //Wait a frame
-        _openNodes.Add(start);
+        openNodes.Add(start);
+        openTree.Add(start);
         start.Available = false;
         waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
         counter = 0;
-        while (_openNodes.Count != 0)
+
+        //while (openTree.Count != 0)
+        while (openNodes.Count != 0)
         {
             //Split loop over multiple frames
             counter++;
@@ -132,8 +137,8 @@ public class Astar : MonoBehaviour
                 counter = 0;
                 yield return null;
             }
-
-            var current = _openNodes.Aggregate((x1, x2) => x1.F < x2.F ? x1 : x2); //Find the node with the lowest F value
+            //var current = openTree.Min();
+            var current = openNodes.Aggregate((x1, x2) => x1.F < x2.F ? x1 : x2); //Find the node with the lowest F value
             if (current == target)
                 break; //Reached the target so its done
 
@@ -166,11 +171,13 @@ public class Astar : MonoBehaviour
 
                     node.Parent = current;
                     node.Available = false;
-                    _openNodes.Add(node);
+                    openNodes.Add(node);
+                    openTree.Add(node);
                 }
             }
-            _openNodes.Remove(current);
-            _closedNodes.Add(current);
+            openTree.Remove(current);
+            openNodes.Remove(current);
+            closedNodes.Add(current);
         }
         _isSearching = false;
         _actionPath(RetracePath(start, target)); //Callback
@@ -251,7 +258,7 @@ public class Astar : MonoBehaviour
 /// <summary>
 /// A* node
 /// </summary>
-public class ANode
+public class ANode : IComparable
 {
     public int[] gIndex; //is an array of the row ([0]) column ([1]) index
     public Vector3 Position; // Is used to find the nearest node and to find where to go
@@ -263,5 +270,16 @@ public class ANode
     public float F
     {
         get { return H + G; }
+    }
+
+    public int CompareTo(object obj)
+    {
+        if (obj == null)
+            throw new ArgumentNullException();
+        ANode other = obj as ANode;
+        if (other == null)
+            throw new ArgumentException("Object is not a test");
+
+        return this.F.CompareTo(other.F);
     }
 }
