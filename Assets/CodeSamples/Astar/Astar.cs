@@ -96,7 +96,6 @@ public class Astar : MonoBehaviour
     {
         _isSearching = true;
         List<ANode> openNodes = new List<ANode>();
-        var openTree = new BTree<ANode>();
         List<ANode> closedNodes = new List<ANode>();
 
         int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 5) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to split the following loop over multiple frames
@@ -122,12 +121,9 @@ public class Astar : MonoBehaviour
         }
         yield return null; //Wait a frame
         openNodes.Add(start);
-        openTree.Add(start);
         start.Available = false;
         waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
         counter = 0;
-
-        //while (openTree.Count != 0)
         while (openNodes.Count != 0)
         {
             //Split loop over multiple frames
@@ -137,7 +133,7 @@ public class Astar : MonoBehaviour
                 counter = 0;
                 yield return null;
             }
-            //var current = openTree.Min();
+            
             var current = openNodes.Aggregate((x1, x2) => x1.F < x2.F ? x1 : x2); //Find the node with the lowest F value
             if (current == target)
                 break; //Reached the target so its done
@@ -172,10 +168,8 @@ public class Astar : MonoBehaviour
                     node.Parent = current;
                     node.Available = false;
                     openNodes.Add(node);
-                    openTree.Add(node);
                 }
             }
-            openTree.Remove(current);
             openNodes.Remove(current);
             closedNodes.Add(current);
         }
@@ -258,7 +252,7 @@ public class Astar : MonoBehaviour
 /// <summary>
 /// A* node
 /// </summary>
-public class ANode : IComparable
+public class ANode
 {
     public int[] gIndex; //is an array of the row ([0]) column ([1]) index
     public Vector3 Position; // Is used to find the nearest node and to find where to go
@@ -270,16 +264,5 @@ public class ANode : IComparable
     public float F
     {
         get { return H + G; }
-    }
-
-    public int CompareTo(object obj)
-    {
-        if (obj == null)
-            throw new ArgumentNullException();
-        ANode other = obj as ANode;
-        if (other == null)
-            throw new ArgumentException("Object is not a test");
-
-        return this.F.CompareTo(other.F);
     }
 }
