@@ -12,6 +12,10 @@ This is my implementation of the A* algorithm. It is showcased in the demo scene
 
 A Fsm made for the menu management in the game Tribot Smash, but it is an all purpose statemachine. In the demo scene you can find an example of how it can be used  WIP still needs a demo scene
 
+# Generic Binary Tree
+
+My take on a generic binary tree implementation. It is used as openlist in the A* algorithm as example WIP Fix bug
+
 # Isometric Dynamic Camera
 
 An Isometric Camera that can switch camera angles easily by rotating and still keep all the action within the view space by positioning itself correctly based on target and FoV  WIP Needs code clean up and optimisations
