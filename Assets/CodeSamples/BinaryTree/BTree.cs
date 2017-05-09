@@ -7,7 +7,7 @@ using System.Text;
 /// A simple generic binary tree implementation with binary search
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class BTree<T> where T : IComparable
+public class BTree<T> where T : IComparable<T>
 {
     private BNode _start;
     private int _count = 0;
@@ -36,15 +36,7 @@ public class BTree<T> where T : IComparable
         if (_start == null)
             throw new Exception("No content in tree");
 
-        var current = _start;
-        while (true)
-        {
-            if (current.Left == null)
-                break;
-            current = current.Left;
-        }
-
-        return current.Value;
+        return Min(_start).Value;
     }
 
     /// <summary>
@@ -56,7 +48,25 @@ public class BTree<T> where T : IComparable
         if (_start == null)
             throw new Exception("No content in tree");
 
-        var current = _start;
+        return Max(_start).Value;
+    }
+
+    private BNode Min(BNode start)
+    {
+        var current = start;
+        while (true)
+        {
+            if (current.Left == null)
+                break;
+            current = current.Left;
+        }
+
+        return current;
+    }
+
+    private BNode Max(BNode start)
+    {
+        var current = start;
         while (true)
         {
             if (current.Right == null)
@@ -64,7 +74,7 @@ public class BTree<T> where T : IComparable
             current = current.Right;
         }
 
-        return current.Value;
+        return current;
     }
 
     /// <summary>
@@ -89,41 +99,40 @@ public class BTree<T> where T : IComparable
     /// <param name="start"></param>
     private void Add(BNode value, BNode start)
     {
+        if (value == null)
+            return;
+
         if (value == start)
             return;
 
-        bool placed = false;
-        var current = start;
-        while (!placed)
+        if (start == null)
+            throw new ArgumentException("Start must have a value!");
+
+        int compare = value.Value.CompareTo(start.Value);
+        if (compare == 0)
+            return;
+        else if (compare == 1)
         {
-            int compare = value.Value.CompareTo(current.Value);
-            if (compare == 0)
+            if (start.Right == null)
             {
-                placed = true;
-            } else if (compare == 1)
+                start.Right = value;
+                value.Parent = start;
+            }
+            else
             {
-                if (current.Right == null)
-                {
-                    current.Right = value;
-                    value.Parent = current;
-                    placed = true;
-                }
-                else
-                {
-                    current = current.Right;
-                }
-            } else if (compare == -1)
+                Add(value, start.Right);
+            }
+
+        } else if (compare == -1)
+        {
+            if (start.Left == null)
             {
-                if (current.Left == null)
-                {
-                    current.Left = value;
-                    value.Parent = current;
-                    placed = true;
-                }
-                else
-                {
-                    current = current.Left;
-                }
+                start.Left = value;
+                value.Parent = start;
+            }
+            else
+            {
+                Add(value, start.Left);
             }
         }
     }
@@ -173,39 +182,56 @@ public class BTree<T> where T : IComparable
         var right = node.Right;
         var parent = node.Parent;
 
-        //Determine which node should replace the current node and which node should move to a new position
-        BNode replacementNode = null;
-        BNode moveNode = null;
-        if (left != null)
+        //If parent null replace node with the highest value of the left tree
+        //If there is no left replace with min value or right tree
+        if (parent == null)
         {
-            replacementNode = left;
-            moveNode = right;
-        }
-        else
-        {
-            replacementNode = right;
-        }
-
-        if (parent != null)
-        {
-            //Find and replace the node in the parent child
-            if (parent.Left != null && parent.Left == node) 
+            if (left != null)
             {
-                parent.Left = replacementNode;
+                _start = Max(left);
+                _start.Parent = null;
+                Add(right, _start);
             }
-            else if (parent.Left != null && parent.Right == node)
+            else if (right != null)
             {
-                parent.Right = replacementNode;
+                _start = Min(right);
+                _start.Parent = null;
+                Add(left, _start);
             }
         }
         else
         {
-            _start = replacementNode; // if there wasn't a parent the replacement node is the new start
+            if (parent.Left == node)
+            {
+                if (left != null)
+                {
+                    parent.Left = Max(left);
+                    parent.Left.Parent = parent;
+                    Add(right, parent.Left);
+                }
+                else if (right != null)
+                {
+                    parent.Left = Min(right);
+                    parent.Left.Parent = parent;
+                    Add(left, parent.Left);
+                }
+                
+            } else if (parent.Right == node)
+            {
+                if (right != null)
+                {
+                    parent.Right = Min(right);
+                    parent.Right.Parent = parent;
+                    Add(left, parent.Right);
+                }
+                else if (left != null)
+                {
+                    parent.Right = Max(left);
+                    parent.Right.Parent = parent;
+                    Add(right, parent.Right);
+                }
+            }
         }
-        if (replacementNode != null)
-            replacementNode.Parent = parent;
-        if (moveNode != null)
-            Add(moveNode, _start); //The determined node to move to a new position gets moved normally to the new position
     }
 
     private class BNode

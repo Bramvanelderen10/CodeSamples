@@ -34,7 +34,7 @@ public class DemoBtree : MonoBehaviour
 
 
 
-    public class test : IComparable
+    public class test : IComparable<test>
     {
         private string value;
         private float compareValue;
@@ -45,20 +45,17 @@ public class DemoBtree : MonoBehaviour
             compareValue = index;
         }
 
-        public int CompareTo(object obj)
+        public void OutputTestString()
         {
-            if (obj == null)
-                throw new ArgumentNullException();
-            test other = obj as test;
+            print(value + " real value: " + compareValue);
+        }
+
+        public int CompareTo(test other)
+        {
             if (other == null)
                 throw new ArgumentException("Object is not a test");
 
             return this.compareValue.CompareTo(other.compareValue);
-        }
-
-        public void OutputTestString()
-        {
-            print(value + " real value: " + compareValue);
         }
     }
 }
