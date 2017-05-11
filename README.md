@@ -6,7 +6,7 @@ https://github.com/Bramvanelderen10/CodeSamples/tree/master/Assets/CodeSamples
 
 # A* Algorithm
 
-This is my implementation of the A* algorithm. It is showcased in the demo scene with some editor UI for convenience  WIP Needs code clean up and optimisations
+This is my implementation of the A* algorithm. It is showcased in the demo scene with some editor UI for convenience
 
 # Finite State Machine
 
@@ -14,7 +14,7 @@ A Fsm made for the menu management in the game Tribot Smash, but it is an all pu
 
 # Generic Binary Tree
 
-My take on a generic binary tree implementation. It is used as openlist in the A* algorithm as example WIP Fix bug
+My take on a generic binary tree implementation. Unit tests are included for the tree and the binary tree is used as open list in the A* algorithm
 
 # Isometric Dynamic Camera
 
