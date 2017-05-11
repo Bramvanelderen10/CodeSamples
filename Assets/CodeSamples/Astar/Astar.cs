@@ -125,7 +125,6 @@ public class Astar : MonoBehaviour
         waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
         counter = 0;
         while (openTree.Count != 0)
-        //while (openNodes.Count != 0)
         {
             //Split loop over multiple frames
             counter++;
@@ -136,7 +135,6 @@ public class Astar : MonoBehaviour
             }
 
             var current = openTree.Min();
-            //var current = openNodes.Aggregate((x1, x2) => x1.F < x2.F ? x1 : x2); //Find the node with the lowest F value
             if (current == target)
                 break; //Reached the target so its done
 

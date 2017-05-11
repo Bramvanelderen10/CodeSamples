@@ -10,7 +10,6 @@ using System.Text;
 public class BTree<T> where T : IComparable<T>
 {
     private BNode _start;
-    private int _count = 0;
 
     public int Count
     {
@@ -89,7 +88,6 @@ public class BTree<T> where T : IComparable<T>
     /// <param name="value"></param>
     public void Add(T value)
     {
-        _count++;
         var node = new BNode(value);
 
         if (_start == null)
@@ -180,8 +178,6 @@ public class BTree<T> where T : IComparable<T>
         var node = GetNode(item);
         if (node == null)
             return;
-
-        _count--;
 
         //Acquire relevant parents and children
         var left = node.Left;
