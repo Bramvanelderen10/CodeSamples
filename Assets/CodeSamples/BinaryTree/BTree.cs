@@ -14,7 +14,13 @@ public class BTree<T> where T : IComparable<T>
 
     public int Count
     {
-        get { return _count; }
+        get
+        {
+            if (_start == null)
+                return 0;
+
+            return CountRecursive(_start);
+        }
     }
 
     /// <summary>
@@ -181,57 +187,103 @@ public class BTree<T> where T : IComparable<T>
         var left = node.Left;
         var right = node.Right;
         var parent = node.Parent;
+        if (left == null && right == null) //No child nodes so we can simply remove the node
+        {
+            if (parent == null)
+            {
+                _start = null;
+            } else if (parent.Left == node)
+            {
+                parent.Left = null;
+            }
+            else
+            {
+                parent.Right = null;
+            }
+        } else if (left == null || right == null)
+        {
+            var child = (left != null) ? left : right;
+            child.Parent = parent;
 
-        //If parent null replace node with the highest value of the left tree
-        //If there is no left replace with min value or right tree
-        if (parent == null)
-        {
-            if (left != null)
+            if (parent == null)
             {
-                _start = Max(left);
-                _start.Parent = null;
-                Add(right, _start);
+                _start = child;
+            } else if (parent.Left == node)
+            {
+                parent.Left = child;
             }
-            else if (right != null)
+            else
             {
-                _start = Min(right);
-                _start.Parent = null;
-                Add(left, _start);
+                parent.Right = child;
             }
-        }
-        else
+        } else if (left != null && right != null)
         {
-            if (parent.Left == node)
+            BNode replacementNode = null;
+            if (parent == null || parent.Left == node)
             {
-                if (left != null)
+                replacementNode = Max(left);
+                if (replacementNode == left)
                 {
-                    parent.Left = Max(left);
-                    parent.Left.Parent = parent;
-                    Add(right, parent.Left);
+                    left = replacementNode.Left;
+
+                } else if (replacementNode.Left != null)
+                {
+                    replacementNode.Parent.Right = replacementNode.Left;
+                    replacementNode.Left.Parent = replacementNode.Parent;
                 }
-                else if (right != null)
+                else
                 {
-                    parent.Left = Min(right);
-                    parent.Left.Parent = parent;
-                    Add(left, parent.Left);
+                    replacementNode.Parent.Right = null;
+                }
+
+                if (parent == null)
+                {
+                    replacementNode.Parent = null; //Replacement nodes parent is the parent of old node
+                    _start = replacementNode;
+                }
+                else
+                {
+                    replacementNode.Parent = parent; //Replacement nodes parent is the parent of old node
+                    parent.Left = replacementNode;
                 }
                 
-            } else if (parent.Right == node)
+            } else
             {
-                if (right != null)
+                replacementNode = Min(right);
+                if (replacementNode == right)
                 {
-                    parent.Right = Min(right);
-                    parent.Right.Parent = parent;
-                    Add(left, parent.Right);
-                }
-                else if (left != null)
+                    right = replacementNode.Right;
+                } else if (replacementNode.Right != null)
                 {
-                    parent.Right = Max(left);
-                    parent.Right.Parent = parent;
-                    Add(right, parent.Right);
+                    replacementNode.Parent.Left = replacementNode.Right;
+                    replacementNode.Right.Parent = replacementNode.Parent;
                 }
+                else
+                {
+                    replacementNode.Parent.Left = null;
+                }
+                replacementNode.Parent = parent; //Replacement nodes parent is the parent of old node
+                parent.Right = replacementNode;
             }
+            replacementNode.Left = left;
+            replacementNode.Right = right;
+
+            if (left != null)
+                left.Parent = replacementNode;
+            if (right != null)
+                right.Parent = replacementNode;
         }
+    }
+
+    private int CountRecursive(BNode root)
+    {
+        int count = 1;
+        if (root.Left != null)
+            count += CountRecursive(root.Left);
+        if (root.Right != null)
+            count += CountRecursive(root.Right);
+
+        return count;
     }
 
     private class BNode
