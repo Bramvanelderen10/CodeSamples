@@ -89,6 +89,19 @@ public class BinaryTreeTests {
     }
 
     [Test]
+    public void BinaryTreeCountTest()
+    {
+        var tree = new BTree<float>();
+        int count = 14;
+        for (int i = 0; i < count; i++)
+        {
+            tree.Add(i);
+        }
+
+        Assert.AreEqual(count, tree.Count, "Tree count invalid");
+    }
+
+    [Test]
     public void BinaryTreeCustomClassTest()
     {
         var obj1 = new TestClass("Object1", 10);
