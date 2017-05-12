@@ -14,7 +14,6 @@ public class Astar : MonoBehaviour
 
     [SerializeField] private LayerMask _layer;
     [SerializeField] private Vector3 _nodeHalfExtends; //Defines how big each node is
-    [SerializeField] private int _searchDuration = 300;
     private ANode[,,] _nodesArray;
     private bool _isSearching = false;
     private int _width; //Width of the grid (Columns)
@@ -28,7 +27,7 @@ public class Astar : MonoBehaviour
     /// </summary>
     /// <param name="width"></param>
     /// <param name="length"></param>
-    public void GenerateGrid(int width, int length, int height)
+    public void GenerateGrid(int width, int length, int height, Vector3 center)
     {
         if (_isSearching)
             return;
@@ -38,6 +37,10 @@ public class Astar : MonoBehaviour
         _height = height;
         _nodesArray = new ANode[length, width, height];
 
+        var positionalOffset = center +
+                               new Vector3(-_nodeHalfExtends.x*width, -_nodeHalfExtends.y*height,
+                                   -_nodeHalfExtends.z*length);
+
         for (int i = 0; i < length; i++)
         {
             for (int j = 0; j < width; j++)
@@ -45,7 +48,7 @@ public class Astar : MonoBehaviour
                 for (int k = 0; k < height; k++)
                 {
                     var node = new ANode();
-                    node.Position = new Vector3((j * (_nodeHalfExtends.x * 2)) + (_nodeHalfExtends.x), (k * (_nodeHalfExtends.y * 2) + (_nodeHalfExtends.y)), (i * (_nodeHalfExtends.z * 2)) + (_nodeHalfExtends.z));
+                    node.Position = positionalOffset + new Vector3((j * (_nodeHalfExtends.x * 2)) + (_nodeHalfExtends.x), (k * (_nodeHalfExtends.y * 2) + (_nodeHalfExtends.y)), (i * (_nodeHalfExtends.z * 2)) + (_nodeHalfExtends.z));
                     node.gIndex = new int[3];
                     node.gIndex[0] = i;
                     node.gIndex[1] = j;
@@ -103,19 +106,9 @@ public class Astar : MonoBehaviour
         _isSearching = true;
         BTree<ANode> openTree = new BTree<ANode>();
         List<ANode> closedNodes = new List<ANode>();
-
-        int waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length / ((_searchDuration / 5) / (float)(10000 / _nodesArray.Length))); //Estimated interval value to split the following loop over multiple frames
-        int counter = 0;
         //Reset all nodes to default values and set availability and H value
         foreach (var node in _nodesArray)
         {
-            //Split loop over multiple frames
-            counter++;
-            if (counter >= waitFrameInterval)
-            {
-                counter = 0;
-                yield return null;
-            }
             if (Physics.CheckBox(node.Position, _nodeHalfExtends, Quaternion.identity, _layer))
                 continue;
 
@@ -128,18 +121,8 @@ public class Astar : MonoBehaviour
         yield return null; //Wait a frame
         openTree.Add(start);
         start.Available = false;
-        waitFrameInterval = Mathf.FloorToInt(_nodesArray.Length/ (_searchDuration / (float)(10000 / _nodesArray.Length))); //Estimated interval value to improve performance over long distance paths
-        counter = 0;
         while (openTree.Count != 0)
         {
-            //Split loop over multiple frames
-            counter++;
-            if (counter >= waitFrameInterval)
-            {
-                counter = 0;
-                yield return null;
-            }
-
             var current = openTree.Min();
             if (current == target)
                 break; //Reached the target so its done
@@ -148,7 +131,7 @@ public class Astar : MonoBehaviour
             {
                 for (int j = -1; j < 2; j++) // Loop from column -1 to 1 based on the current column
                 {
-                    for (int k = 0; k < 2; k++)
+                    for (int k = -1; k < 2; k++)
                     {
                         //Filter edge cases
                         if (i == -1 && current.gIndex[0] == 0)

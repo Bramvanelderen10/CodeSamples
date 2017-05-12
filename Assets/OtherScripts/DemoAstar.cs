@@ -25,6 +25,7 @@ public class DemoAstar : MonoBehaviour
     [HideInInspector]
     public Vector3 TargetPosition  = Vector3.one * 10;
 
+    [HideInInspector] public GameObject GridCenter;
     [HideInInspector] public GameObject StartObj;
     [HideInInspector] public GameObject EndObj;
 
@@ -49,7 +50,8 @@ public class DemoAstar : MonoBehaviour
 
     public void GenerateGrid()
     {
-        _astar.GenerateGrid(_columns, _rows, _height);
+        var position = GridCenter ? GridCenter.transform.position : Vector3.zero;
+        _astar.GenerateGrid(_columns, _rows, _height, position);
     }
 
     public void GeneratePath()

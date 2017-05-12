@@ -15,6 +15,7 @@ public class DemoAstarEditor : Editor
         script._rows = EditorGUILayout.IntField("Rows", script._rows);
         script._columns = EditorGUILayout.IntField("Columns", script._columns);
         script._height = EditorGUILayout.IntField("Height", script._height);
+        script.GridCenter = (GameObject)EditorGUILayout.ObjectField(script.GridCenter, typeof(GameObject), true);
         if (GUILayout.Button("Update Grid"))
         {
             script.GenerateGrid();
