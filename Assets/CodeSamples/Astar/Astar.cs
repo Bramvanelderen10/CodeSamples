@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using System.Threading;
 
 /// <summary>
 /// Grid based astar algorithm
@@ -104,21 +105,48 @@ public class Astar : MonoBehaviour
     IEnumerator FindPath(ANode start, ANode target)
     {
         _isSearching = true;
-        BTree<ANode> openTree = new BTree<ANode>();
-        List<ANode> closedNodes = new List<ANode>();
+        SetupNodes(target);
+        yield return null;
+
+        var traverseThread = new Thread(() => TraverseNodes(start, target));
+        traverseThread.Start();
+        while (traverseThread.IsAlive)
+            yield return null;
+
+        _isSearching = false;
+        _actionPath(RetracePath(start, target)); //Callback
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target"></param>
+    void SetupNodes(ANode target)
+    {
         //Reset all nodes to default values and set availability and H value
         foreach (var node in _nodesArray)
         {
-            if (Physics.CheckBox(node.Position, _nodeHalfExtends, Quaternion.identity, _layer))
-                continue;
-
             //Calculate h value
             node.H = Mathf.Abs(node.gIndex[1] - target.gIndex[1]) + Mathf.Abs(node.gIndex[0] - target.gIndex[0]) + Mathf.Abs(node.gIndex[2] - target.gIndex[2]);
             node.G = 0;
             node.Parent = null;
             node.Available = true;
+            if(Physics.CheckBox(node.Position, _nodeHalfExtends, Quaternion.identity, _layer))
+                node.Occupied = true;
         }
-        yield return null; //Wait a frame
+    }
+
+    /// <summary>
+    /// Traverses all nodes based on a given start and target value
+    /// Can be threaded
+    /// </summary>
+    /// <param name="openTree"></param>
+    /// <param name="closedNodes"></param>
+    /// <param name="target"></param>
+    void TraverseNodes(ANode start, ANode target)
+    { 
+        BTree<ANode> openTree = new BTree<ANode>();
+        List<ANode> closedNodes = new List<ANode>();
         openTree.Add(start);
         start.Available = false;
         while (openTree.Count != 0)
@@ -148,7 +176,7 @@ public class Astar : MonoBehaviour
                             continue;
 
                         var node = _nodesArray[current.gIndex[0] + i, current.gIndex[1] + j, current.gIndex[2] + k];
-                        if (!node.Available)
+                        if (!node.Available || node.Occupied)
                             continue;
 
                         //Check if diagonal, if so more G cost
@@ -198,8 +226,6 @@ public class Astar : MonoBehaviour
             openTree.Remove(current);
             closedNodes.Add(current);
         }
-        _isSearching = false;
-        _actionPath(RetracePath(start, target)); //Callback
     }
 
     /// <summary>
@@ -271,6 +297,7 @@ public class ANode : IComparable<ANode>
     public float H; //The estimate from this node to target node
     public float G; //The value required to travel to this node from start
     public bool Available = true; //Should this node be included in the search
+    public bool Occupied = false;
 
     public float F
     {
