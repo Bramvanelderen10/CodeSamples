@@ -6,7 +6,7 @@ using System;
 
 /// <summary>
 /// Grid based astar algorithm
-/// Verical/Horizontal movement cost 10, diagonal is 14
+/// Verical/Horizontal movement cost 10, diagonal is 14, diagonal to corners is 17
 /// </summary>
 public class Astar : MonoBehaviour
 {
@@ -15,10 +15,11 @@ public class Astar : MonoBehaviour
     [SerializeField] private LayerMask _layer;
     [SerializeField] private Vector3 _nodeHalfExtends; //Defines how big each node is
     [SerializeField] private int _searchDuration = 300;
-    private ANode[,] _nodesArray;
+    private ANode[,,] _nodesArray;
     private bool _isSearching = false;
     private int _width; //Width of the grid (Columns)
     private int _length; //Length of the grid (Rows)
+    private int _height;
     private ActionPath _actionPath; //Is used when the path is generated
 
 
@@ -27,25 +28,30 @@ public class Astar : MonoBehaviour
     /// </summary>
     /// <param name="width"></param>
     /// <param name="length"></param>
-    public void GenerateGrid(int width, int length)
+    public void GenerateGrid(int width, int length, int height)
     {
         if (_isSearching)
             return;
 
         _width = width;
         _length = length;
-        _nodesArray = new ANode[length, width];
+        _height = height;
+        _nodesArray = new ANode[length, width, height];
 
         for (int i = 0; i < length; i++)
         {
             for (int j = 0; j < width; j++)
             {
-                var node = new ANode();
-                node.Position = new Vector3((j * (_nodeHalfExtends.x * 2)) + (_nodeHalfExtends.x), transform.position.y, (i * (_nodeHalfExtends.z * 2)) + (_nodeHalfExtends.z));
-                node.gIndex = new int[2];
-                node.gIndex[0] = i;
-                node.gIndex[1] = j;
-                _nodesArray[i, j] = node;
+                for (int k = 0; k < height; k++)
+                {
+                    var node = new ANode();
+                    node.Position = new Vector3((j * (_nodeHalfExtends.x * 2)) + (_nodeHalfExtends.x), (k * (_nodeHalfExtends.y * 2) + (_nodeHalfExtends.y)), (i * (_nodeHalfExtends.z * 2)) + (_nodeHalfExtends.z));
+                    node.gIndex = new int[3];
+                    node.gIndex[0] = i;
+                    node.gIndex[1] = j;
+                    node.gIndex[2] = k;
+                    _nodesArray[i, j, k] = node;
+                }
             }
         }
     }
@@ -114,7 +120,7 @@ public class Astar : MonoBehaviour
                 continue;
 
             //Calculate h value
-            node.H = Mathf.Abs(node.gIndex[1] - target.gIndex[1]) + Mathf.Abs(node.gIndex[0] - target.gIndex[0]);
+            node.H = Mathf.Abs(node.gIndex[1] - target.gIndex[1]) + Mathf.Abs(node.gIndex[0] - target.gIndex[0]) + Mathf.Abs(node.gIndex[2] - target.gIndex[2]);
             node.G = 0;
             node.Parent = null;
             node.Available = true;
@@ -142,32 +148,68 @@ public class Astar : MonoBehaviour
             {
                 for (int j = -1; j < 2; j++) // Loop from column -1 to 1 based on the current column
                 {
-                    //Filter edge cases
-                    if (i == -1 && current.gIndex[0] == 0)
-                        continue;
-                    if (i == 1 && current.gIndex[0] == _length - 1)
-                        continue;
-                    if (j == -1 && current.gIndex[1] == 0)
-                        continue;
-                    if (j == 1 && current.gIndex[1] == _width - 1)
-                        continue;
+                    for (int k = 0; k < 2; k++)
+                    {
+                        //Filter edge cases
+                        if (i == -1 && current.gIndex[0] == 0)
+                            continue;
+                        if (i == 1 && current.gIndex[0] == _length - 1)
+                            continue;
+                        if (j == -1 && current.gIndex[1] == 0)
+                            continue;
+                        if (j == 1 && current.gIndex[1] == _width - 1)
+                            continue;
+                        if (k == -1 && current.gIndex[2] == 0)
+                            continue;
+                        if (k == 1 && current.gIndex[2] == _height - 1)
+                            continue;
 
-                    var node = _nodesArray[current.gIndex[0] + i,current.gIndex[1] + j];
-                    if (!node.Available)
-                        continue;
+                        var node = _nodesArray[current.gIndex[0] + i, current.gIndex[1] + j, current.gIndex[2] + k];
+                        if (!node.Available)
+                            continue;
 
-                    //Check if diagonal, if so more G cost
-                    if (i == -1 && j == -1 ||
-                        i == -1 && j == 1 ||
-                        i == 1 && j == -1 ||
-                        i == 1 && j == 1)
-                        node.G = current.G + 14;
-                    else
-                        node.G = current.G + 10;
+                        //Check if diagonal, if so more G cost
+                        if (i == -1 && j == -1 && k == -1 ||
+                            i == -1 && j == -1 && k == 1 ||
+                            i == -1 && j == 1 && k == -1 ||
+                            i == -1 && j == 1 && k == 1 ||
 
-                    node.Parent = current;
-                    node.Available = false;
-                    openTree.Add(node);
+                            i == 1 && j == -1 && k == -1 ||
+                            i == 1 && j == -1 && k == 1 ||
+                            i == 1 && j == 1 && k == -1 ||
+                            i == 1 && j == 1 && k == 1)
+                        {
+                            node.G = current.G + 17;
+                        }
+                        else if (
+                            i == -1 && j == -1 && k == 0 ||
+                            i == -1 && j == 1 && k == 0 ||
+                            i == 1 && j == -1 && k == 0 ||
+                            i == 1 && j == 1 && k == 0 ||
+
+                            i == -1 && k == -1 && j == 0 ||
+                            i == -1 && k == 1 && j == 0 ||
+                            i == 1 && k == -1 && j == 0 ||
+                            i == 1 && k == 1 && j == 0 ||
+
+                            k == -1 && j == -1 && i == 0 ||
+                            k == -1 && j == 1 && i == 0 ||
+                            k == 1 && j == -1 && i == 0 ||
+                            k == 1 && j == 1 && i == 0
+                            )
+                        {
+                            node.G = current.G + 14;
+                        }
+                        else
+                        {
+                            node.G = current.G + 10;
+                        }
+
+                        node.Parent = current;
+                        node.Available = false;
+
+                        openTree.Add(node);
+                    }
                 }
             }
             openTree.Remove(current);
@@ -206,7 +248,7 @@ public class Astar : MonoBehaviour
     /// <returns></returns>
     ANode FindNearestNode(Vector3 position)
     {
-        var result = _nodesArray[0, 0];
+        var result = _nodesArray[0, 0, 0];
         foreach (var node in _nodesArray)
         {
             if (Vector3.Distance(node.Position, position) < Vector3.Distance(result.Position, position))
@@ -232,20 +274,6 @@ public class Astar : MonoBehaviour
         }
 
         return result;
-    }
-
-    /// <summary>
-    /// Converts a regular node index to a grid index where 0 is row and 1 is column
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    int[] ConvertIndexToGridIndex(int index)
-    {
-        int[] gIndex = new int[2];
-        gIndex[0] = Mathf.FloorToInt((float)index / (float)_width);
-        gIndex[1] = index - (gIndex[0] * _width);
-
-        return gIndex;
     }
 }
 

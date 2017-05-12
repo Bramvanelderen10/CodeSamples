@@ -17,6 +17,8 @@ public class DemoAstar : MonoBehaviour
     [HideInInspector]
     public int _columns = 10;
     [HideInInspector]
+    public int _height = 10;
+    [HideInInspector]
     public bool ContinuesPathDemo = true;
     [HideInInspector]
     public Vector3 StartPosition = Vector3.zero;
@@ -47,7 +49,7 @@ public class DemoAstar : MonoBehaviour
 
     public void GenerateGrid()
     {
-        _astar.GenerateGrid(_columns, _rows);
+        _astar.GenerateGrid(_columns, _rows, _height);
     }
 
     public void GeneratePath()

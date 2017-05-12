@@ -14,6 +14,7 @@ public class DemoAstarEditor : Editor
         var script = (DemoAstar)target;
         script._rows = EditorGUILayout.IntField("Rows", script._rows);
         script._columns = EditorGUILayout.IntField("Columns", script._columns);
+        script._height = EditorGUILayout.IntField("Height", script._height);
         if (GUILayout.Button("Update Grid"))
         {
             script.GenerateGrid();
