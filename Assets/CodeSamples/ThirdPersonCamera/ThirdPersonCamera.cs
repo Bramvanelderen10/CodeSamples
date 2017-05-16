@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
-using System;
+﻿using UnityEngine;
 
 /// <summary>
 /// Orbits around the selected target based on values in CameraData
@@ -19,10 +15,7 @@ public class ThirdPersonCamera : AbstractCamera
 	{
 	    _data = Resources.Load<ThirdPersonCameraData>("ThirdPersonCameraData");
 	}
-	
-    /// <summary>
-    /// Updates the camera position and rotation
-    /// </summary>
+
     void LateUpdate ()
     {
         if (!_target)

@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using System;
 using System.Threading;
 
@@ -21,13 +20,14 @@ public class Astar : MonoBehaviour
     private int _length; //Length of the grid (Rows)
     private int _height;
     private ActionPath _actionPath; //Is used when the path is generated
-
-
+    
     /// <summary>
-    /// Generates a node grid
+    /// Gemerades the 3D node grid
     /// </summary>
     /// <param name="width"></param>
     /// <param name="length"></param>
+    /// <param name="height"></param>
+    /// <param name="center"></param>
     public void GenerateGrid(int width, int length, int height, Vector3 center)
     {
         if (_isSearching)
@@ -61,7 +61,7 @@ public class Astar : MonoBehaviour
     }
 
     /// <summary>
-    /// Initiates the algorithm
+    /// Initiates the pathfinding algorithm and sets the callback delegate
     /// </summary>
     /// <param name="startPosition"></param>
     /// <param name="targetPosition"></param>
@@ -96,9 +96,9 @@ public class Astar : MonoBehaviour
     }
 
     /// <summary>
-    /// The algorithm itself, in an ienumerator so we can split the logic over multiple frames for performance
+    /// Resets the nodes to their default values
+    /// Then starts the algorithm to find a new path in a separate thread and waits for it to finish
     /// </summary>
-    /// <param name="maxDuration"></param>
     /// <param name="start"></param>
     /// <param name="target"></param>
     /// <returns></returns>
@@ -120,7 +120,7 @@ public class Astar : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Resets nodes to default values and check which nodes are occupied by obstacles
     /// </summary>
     /// <param name="target"></param>
     void SetupNodes(ANode target)
@@ -139,11 +139,11 @@ public class Astar : MonoBehaviour
     }
 
     /// <summary>
-    /// Traverses all nodes based on a given start and target value
-    /// Can be threaded
+    /// The A* algorithm implementation
+    /// Traverses all the nodes until the target is reached 
+    /// Based on 3D grid
     /// </summary>
-    /// <param name="openTree"></param>
-    /// <param name="closedNodes"></param>
+    /// <param name="start"></param>
     /// <param name="target"></param>
     void TraverseNodes(ANode start, ANode target)
     { 

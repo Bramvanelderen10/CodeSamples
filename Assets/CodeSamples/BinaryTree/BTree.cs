@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 /// <summary>
 /// A simple generic binary tree implementation with binary search
@@ -56,6 +53,11 @@ public class BTree<T> where T : IComparable<T>
         return Max(_start).Value;
     }
 
+    /// <summary>
+    /// Returns the node iwth the lowest value in the tree
+    /// </summary>
+    /// <param name="start"></param>
+    /// <returns></returns>
     private BNode Min(BNode start)
     {
         var current = start;
@@ -69,6 +71,11 @@ public class BTree<T> where T : IComparable<T>
         return current;
     }
 
+    /// <summary>
+    /// Returns the node with the highest value in the tree
+    /// </summary>
+    /// <param name="start"></param>
+    /// <returns></returns>
     private BNode Max(BNode start)
     {
         var current = start;
@@ -142,7 +149,7 @@ public class BTree<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Retrieve the node that contains this item
+    /// Simple binary search to retrieve the right node
     /// </summary>
     /// <param name="item"></param>
     /// <returns></returns>
@@ -271,6 +278,11 @@ public class BTree<T> where T : IComparable<T>
         }
     }
 
+    /// <summary>
+    /// Counts all the nodes in the tree
+    /// </summary>
+    /// <param name="root"></param>
+    /// <returns></returns>
     private int CountRecursive(BNode root)
     {
         int count = 1;

@@ -61,6 +61,14 @@ public class FlightController : MonoBehaviour
     /// </summary>
     void Update()
     {
+        
+    }
+
+    /// <summary>
+    /// Apply input to velocity
+    /// </summary>
+    void FixedUpdate()
+    {
         //Save input each frame no matter what
         _elevation = new Vector3(0, InputWrapper.GetAxis(_ascend, true) - InputWrapper.GetAxis(_descend, true), 0);
         _input = new Vector3(InputWrapper.GetAxis(_horizontal), 0, InputWrapper.GetAxis(_vertical));
@@ -79,13 +87,8 @@ public class FlightController : MonoBehaviour
             }
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
         }
-    }
 
-    /// <summary>
-    /// Apply input to velocity
-    /// </summary>
-    void FixedUpdate()
-    {
+
         if (!_playerControl)
             return;
 

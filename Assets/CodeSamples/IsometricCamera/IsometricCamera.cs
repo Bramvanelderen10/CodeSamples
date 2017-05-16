@@ -62,7 +62,7 @@ public class IsometricCamera : AbstractCamera
         _posWorldSpace = Vector3.Lerp(_posWorldSpace, centerWorldSpace, _data.MoveSpeed * Time.deltaTime);
 
         //Calculate optimal camera size based on targets
-        //Determine world position of all camera corners on a invisible plane
+        //Determine the local space positions of the camera corners
         var cameraCorners = new Corners();
         var plane = new Plane(transform.rotation * Vector3.back, _posWorldSpace);
         float distance;
@@ -84,6 +84,7 @@ public class IsometricCamera : AbstractCamera
         float max = -99;
         foreach (var target in _targetObjects)
         {
+            //Transform the target position to local space to compare it to the camera corners
             var position = transform.InverseTransformPoint(target.transform.position);
             var targetX = position.x;
             var targetY = position.y;
@@ -115,15 +116,13 @@ public class IsometricCamera : AbstractCamera
             var target = _localPosition.z * max;
             var speed = (target > _localPosition.z) ? _data.ZoomInSpeed : _data.ZoomOutSpeed;
             _localPosition.z = Mathf.Lerp(_localPosition.z, target, speed * Time.deltaTime);
-
         }
 
         //Camera can't scale below minimum size
         if (_localPosition.z > -_data.MinSize)
-        {
             _localPosition.z = -_data.MinSize;
-        }
 
+        //Transform local position back to world space and set it as the new camera position
         _camera.transform.position = _posWorldSpace + (transform.rotation*_localPosition);
     }
 
