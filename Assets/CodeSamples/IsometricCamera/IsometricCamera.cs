@@ -37,29 +37,24 @@ public class IsometricCamera : AbstractCamera
 
         if (_targetObjects.Count < 1)
             return;
+
+        var pos = _targetObjects[0].transform.position;
+        _minX = pos.x;
+        _maxX = pos.x;
+        _minY = pos.y;
+        _maxY = pos.y;
+        _minZ = pos.z;
+        _maxZ = pos.z;
+
         for (var i = 0; i < _targetObjects.Count; i++)
         {
-            var pos = _targetObjects[i].transform.position;
-
-            //Always use the first index as default values so the camera scales and follows correctly
-            if (i == 0)
-            {
-                _minX = pos.x;
-                _maxX = pos.x;
-                _minY = pos.y;
-                _maxY = pos.y;
-                _minZ = pos.z;
-                _maxZ = pos.z;
-            }
-            else
-            {
-                _maxX = Mathf.Max(_maxX, pos.x);
-                _minX = Mathf.Min(_minX, pos.x);
-                _maxY = Mathf.Max(_maxY, pos.y);
-                _minY = Mathf.Min(_minY, pos.y);
-                _maxZ = Mathf.Max(_maxZ, pos.z);
-                _minZ = Mathf.Min(_minZ, pos.z);
-            }
+            pos = _targetObjects[i].transform.position;
+            _maxX = Mathf.Max(_maxX, pos.x);
+            _minX = Mathf.Min(_minX, pos.x);
+            _maxY = Mathf.Max(_maxY, pos.y);
+            _minY = Mathf.Min(_minY, pos.y);
+            _maxZ = Mathf.Max(_maxZ, pos.z);
+            _minZ = Mathf.Min(_minZ, pos.z);
         }
 
         //Calculate the center position between the targets and lerp the camera position towards the center

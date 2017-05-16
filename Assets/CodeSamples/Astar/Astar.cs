@@ -113,8 +113,10 @@ public class Astar : MonoBehaviour
         while (traverseThread.IsAlive)
             yield return null;
 
-        _isSearching = false;
         _actionPath(RetracePath(start, target)); //Callback
+
+
+        _isSearching = false;
     }
 
     /// <summary>
@@ -131,7 +133,7 @@ public class Astar : MonoBehaviour
             node.G = 0;
             node.Parent = null;
             node.Available = true;
-            if(Physics.CheckBox(node.Position, _nodeHalfExtends, Quaternion.identity, _layer))
+            if (Physics.CheckBox(node.Position, _nodeHalfExtends, Quaternion.identity, _layer))
                 node.Occupied = true;
         }
     }

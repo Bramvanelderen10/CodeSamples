@@ -16,9 +16,6 @@ public class FlightController : MonoBehaviour
     }
 
     [SerializeField] private FlightMode _mode;
-    [SerializeField] private float _deaccelerateRate = 2f;
-    [SerializeField] private float _angularDeaccel = 2f;
-    [SerializeField] private AnimationCurve _accellerationCurve;
     [SerializeField] private float _speed;
     [SerializeField] private float _elevationSpeed = 10f;
     [SerializeField] private float _rotationSpeed;
@@ -31,7 +28,6 @@ public class FlightController : MonoBehaviour
     private Rigidbody _rb;
     private Vector3 _input;
     private Vector3 _elevation = Vector3.zero;
-    private float _accelModifier = 0f;
     private bool _playerControl = true;
 
     /// <summary>
@@ -90,20 +86,6 @@ public class FlightController : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        //If there is input accelerate else deaccellerate
-        if (_input.x != 0 || _input.z != 0 || _elevation.y != 0)
-        {
-            _accelModifier += Time.deltaTime * 1f;
-            if (_accelModifier > 1f)
-                _accelModifier = 1f;
-        }
-        else
-        {
-            _accelModifier -= Time.deltaTime * 2f;
-            if (_accelModifier < 0)
-                _accelModifier = 0;
-        }
-
         if (!_playerControl)
             return;
 
@@ -111,12 +93,14 @@ public class FlightController : MonoBehaviour
         if (_input.x != 0 || _input.z != 0 || _elevation.y != 0)
         {
             var direction = Vector3.ClampMagnitude(_input, 1f); //Clamp input for correct speed
-            vel = (_mode == FlightMode.ThirdPerson ? transform.rotation : Quaternion.Euler(0f, Camera.main.transform.rotation.eulerAngles.y, 0f)) * direction * _speed * _accellerationCurve.Evaluate(_accelModifier);
-            vel += (_elevation * _elevationSpeed * _accellerationCurve.Evaluate(_accelModifier));
+            vel = (_mode == FlightMode.ThirdPerson
+                ? transform.rotation
+                : Quaternion.Euler(0f, Camera.main.transform.rotation.eulerAngles.y, 0f))*direction*_speed;
+            vel += _elevation * _elevationSpeed;
         }
         else
         {
-            vel = Vector3.MoveTowards(_rb.velocity, Vector3.zero, _deaccelerateRate * Time.deltaTime); //No input means move speed back to Vector3.zero
+            vel = Vector3.zero;
         }
         _rb.velocity = vel;
         _rb.angularVelocity = Vector3.zero;
