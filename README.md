@@ -20,6 +20,10 @@ My take on a generic binary tree implementation. Unit tests are included for the
 
 An Isometric Camera that can switch camera angles easily by rotating and still keep all the action within the view space by positioning itself correctly based on target and FoV. The camera can be seen in the DynamicCameraDemo scene
 
+# Input Manager
+
+Since Unity's build in input system is awful and good input assets on the asset store are expensive i build my own. The input manager is based in the XInputDotNet library and supports input simultanionsly of 4 gamepads and a keyboard.
+
 # Third Person Camera
 
 A third person camera i made for the game Bumble Jumble, it is packaged with the third person controller. The camera bases its position and rotation on the user input and target rotation. The movement controller itself is based on user input and the camera angle. The camera can be seen in the ThirdPersonDemo scene
