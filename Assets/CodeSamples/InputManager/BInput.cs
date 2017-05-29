@@ -338,7 +338,7 @@ namespace BInput
             var codes = GetAxisCodes(axis);
             if (Input.GetKey(codes[0]))
                 result -= 1;
-            if (Input.GetKey(codes[0]))
+            if (Input.GetKey(codes[1]))
                 result += 1;
 
             return result;
