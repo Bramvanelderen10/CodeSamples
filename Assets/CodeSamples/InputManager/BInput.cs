@@ -53,11 +53,22 @@ namespace BInput
             {InputButtons.LT, InputManager.Button.Lt},
         };
 
+        /// <summary>
+        /// A leftover of my game tribot started out without this input system, to correctly emulate and replace the old way of input the +1 on index was needed
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public static Index IntToIndex(int index)
         {
             return (Index)index + 1;
         }
 
+        /// <summary>
+        /// Returns true if the given button on the given input device is pressed
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public static bool GetButton(InputButtons button, int index)
         {
             var gIndex = IntToIndex(index);
@@ -85,6 +96,12 @@ namespace BInput
             return result;
         }
 
+        /// <summary>
+        /// Returns true if the given button on the given input device is pressed this frame
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public static bool GetButtonDown(InputButtons button, int index)
         {
             var gIndex = IntToIndex(index);
@@ -112,6 +129,12 @@ namespace BInput
             return result;
         }
 
+        /// <summary>
+        /// Returns true if the given button on the given input device is released this frame
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public static bool GetButtonUp(InputButtons button, int index)
         {
             var gIndex = IntToIndex(index);
@@ -139,6 +162,12 @@ namespace BInput
             return result;
         }
 
+        /// <summary>
+        /// Get axis state
+        /// </summary>
+        /// <param name="axis"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public static Vector2 GetAxis(Axis axis, int index)
         {
             var axes = GetAxisFromMap(axis);
@@ -171,7 +200,11 @@ namespace BInput
             return result;
         }
 
-
+        /// <summary>
+        /// Get input manager axis from the Axis enum
+        /// </summary>
+        /// <param name="axis"></param>
+        /// <returns></returns>
         private static InputManager.Axis[] GetAxisFromMap(Axis axis)
         {
             InputManager.Axis[] axes = new InputManager.Axis[2];
