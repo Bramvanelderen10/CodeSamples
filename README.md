@@ -1,6 +1,6 @@
 # CodeSamples
 
-This repository showcases some scripts i've written to showcase a general baseline of my programming skills.
+This repository showcases some scripts i've written to showcase a general baseline of my programming skills. All the script showcased here are for usage in the Unity3D engine, if you are interrested in running this project simply download the repository and open it in Unity to test it out.
 The scripts i want to show off are located in
 https://github.com/Bramvanelderen10/CodeSamples/tree/master/Assets/CodeSamples
 
