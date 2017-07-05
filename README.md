@@ -16,13 +16,13 @@ A Fsm made for the menu management in the game Tribot Smash, but it is an all pu
 
 My take on a generic binary tree implementation. Unit tests are included for the tree and the binary tree is used as open list in the A* algorithm
 
-# Isometric Dynamic Camera
-
-An Isometric Camera that can switch camera angles easily by rotating and still keep all the action within the view space by positioning itself correctly based on target and FoV. The camera can be seen in the DynamicCameraDemo scene
-
 # Input Manager
 
 Since Unity's build in input system is awful and good input assets on the asset store are expensive i build my own. The input manager is based in the XInputDotNet library and supports input simultanionsly of 4 gamepads and a keyboard.
+
+# Isometric Dynamic Camera
+
+An Isometric Camera that can switch camera angles easily by rotating and still keep all the action within the view space by positioning itself correctly based on target and FoV. The camera can be seen in the DynamicCameraDemo scene
 
 # Third Person Camera
 
